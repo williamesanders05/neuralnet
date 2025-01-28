@@ -23,8 +23,11 @@ int main() {
 	toString(rows, cols, arr3);
 	toString(rows, cols, arr4);
 	double** x;
-	initialize_to_zero(1, 1, &x);
-	mlp *layer = initialize_mlp(2, 1, x);
+	initialize_random(3, 1, &x);
+	mlp* layer = initialize_mlp(3, 2, x);
+	double** x2;
+	forward(layer, x2);
+	mlp* layer2 = initialize_mlp(2, 1, x2);
 	printf("first value of w: %f \n", layer->W[0][0]);
 	printf("first value of b: %f \n", layer->b[0][0]);
 	clean_mlp(2, 1, layer);

@@ -87,16 +87,16 @@ typedef struct mlp {
 // b is an m x 1 vector
 // m is the number of output neurons
 // n is the number of input features
-void forward(int n, int m, double** W, double** x, double** b, double** output) {
+void forward(mlp* layer, double** output) {
 	// output is a m x 1 vector where m is the number of output neurons
-	initialize_to_zero(m, 1, &output);
+	initialize_to_zero(layer->m, 1, &output);
 	// multiplied is a m x 1 vector where m is the number of output neurons
 	// multiplied is Wx
 	double** multiplied;
-	initialize_to_zero(m, 1, &multiplied);
-	multiply(m, n, W, n, 1, x, multiplied);
-	add(m, 1, multiplied, b, output);
-	for (int i = 0; i < m; i++) {
+	initialize_to_zero(layer->m, 1, &multiplied);
+	multiply(layer->m, layer->n, layer->W, layer->n, 1, layer->x, multiplied);
+	add(layer->m, 1, multiplied, layer->b, output);
+	for (int i = 0; i < layer->m; i++) {
 		free(multiplied[i]);
 	}
 	free(multiplied);
