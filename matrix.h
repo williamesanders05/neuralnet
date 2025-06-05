@@ -15,6 +15,17 @@ void multiply(int row1, int col1, double** A, int row2, int col2, double** B, do
     }
 }
 
+// Function to multiply a vector and matrix v[a] and M[a][b] returning vector r[b]
+void multiply_vector(int row, int col, double* v, double** m, double* r) {
+    for (int i = 0; i < col; i++) {
+        double sum = 0;
+        for (int j = 0 ; j < row; j++) {
+            sum += v[j] * m[j][i];
+        }
+        r[i] = sum;
+    }
+} 
+
 // Function to transpose matrix A[][] returning matrix C
 void transpose(int row1, int col1, double** A, double** C) {
     for (int i = 0; i < col1; i++) {
@@ -24,12 +35,10 @@ void transpose(int row1, int col1, double** A, double** C) {
     }
 }
 
-// function to add two matrices together
-void add(int row1, int col1, double** A, double** B, double** C) {
+// function to add vector and matrix together
+void add(int row1, int col1, double* A, double* B, double* C) {
     for (int i = 0; i < row1; i++) {
-        for (int j = 0; j < col1; j++) {
-            C[i][j] = A[i][j] + B[i][j];
-        }
+        C[i] = A[i] + B[i];        
     }
 }
 
@@ -43,90 +52,75 @@ void toString(int row1, int col1, double** A) {
     }
 }
 
+// function for deep copying matrices
+void deep_copy(int col, double* mat1, double* mat2) {
+    for (int i = 0; i < col; i++) {
+        mat2[i] = mat1[i];
+    }
+}
+
+// function to add two matrices together
+void subtract(int row1, int col1, double** A, double** B, double** C) {
+    for (int i = 0; i < row1; i++) {
+        for (int j = 0; j < col1; j++) {
+            C[i][j] = A[i][j] - B[i][j];
+        }      
+    }
+}
+
+// function to add two matrices together
+void subtract_vector(int col1, double* A, double* B, double* C) {
+    for (int i = 0; i < col1; i++) {
+        C[i] = A[i] - B[i];        
+    }
+}
+
+void multiply_by_number(int row, int col, double number, double** mat) {
+    for (int i = 0; i < row; i++) {
+        for (int j = 0; j < col; j++) {
+            mat[i][j] *= number;
+        }
+    }
+}
+
+void multiply_by_number_vector(int col, double number, double* mat) {
+    for (int i = 0; i < col; i++) {
+        mat[i] *= number;
+    }
+}
+
 // function for initializing a matrix or vector
 void initialize_random(int rows, int cols, double*** matrix) {
-	*matrix = (double**)malloc(rows * sizeof(double*));
-	for (int i = 0; i < rows; i++) {
-		(*matrix)[i] = (double*)malloc(cols * sizeof(double));
-	}
-	for (int i = 0; i < rows; i++) {
-		for (int j = 0; j < cols; j++) {
-			(*matrix)[i][j] = ((double)rand() / RAND_MAX); // random value in [0.0, 1.0]
-		}
-	}
+    *matrix = (double**)malloc(rows * sizeof(double*));
+    for (int i = 0; i < rows; i++) {
+        (*matrix)[i] = (double*)malloc(cols * sizeof(double));
+    }
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            (*matrix)[i][j] = ((double)rand() / RAND_MAX); // random value in [0.0, 1.0]
+        }
+    }
 }
 
 // function for initializing a matrix to 0
 void initialize_to_zero(int rows, int cols, double*** matrix) {
-	*matrix = (double**)calloc(rows, sizeof(double*));
-	for (int i = 0; i < rows; i++) {
-		(*matrix)[i] = (double*)calloc(cols, sizeof(double));
-	}
+    *matrix = (double**)calloc(rows, sizeof(double*));
+    for (int i = 0; i < rows; i++) {
+        (*matrix)[i] = (double*)calloc(cols, sizeof(double));
+    }
 }
 
-// Struct for a single mlp
-typedef struct mlp {
-	// number of input features
-	int n;
-	// number of output neurons
-	int m;
-	// m x n matrix
-	// must remember to initialize_random this matrix
-	double** W;
-	// m x 1 vector
-	// must remember to initialize_random this vector
-	double** b;
-	// n x 1 vector
-	// either the input of features or the output of last layer
-	double** x;
-} mlp;
-
-// function for forwarding through the mlp
-// W is an m x n matrix
-// x is an n x 1 vector
-// b is an m x 1 vector
-// m is the number of output neurons
-// n is the number of input features
-void forward(mlp* layer, double** output) {
-	// output is a m x 1 vector where m is the number of output neurons
-	initialize_to_zero(layer->m, 1, &output);
-	// multiplied is a m x 1 vector where m is the number of output neurons
-	// multiplied is Wx
-	double** multiplied;
-	initialize_to_zero(layer->m, 1, &multiplied);
-	multiply(layer->m, layer->n, layer->W, layer->n, 1, layer->x, multiplied);
-	add(layer->m, 1, multiplied, layer->b, output);
-	for (int i = 0; i < layer->m; i++) {
-		free(multiplied[i]);
-	}
-	free(multiplied);
+// function for initializing a matrix or vector
+void initialize_random_vector(int cols, double** matrix) {
+    *matrix = (double*)malloc(cols * sizeof(double*));
+    for (int i = 0; i < cols; i++) {
+        (*matrix)[i] = ((double)rand() / RAND_MAX); // random value in [0.0, 1.0]
+    }
 }
 
-// function for initializing an mlp layer
-mlp* initialize_mlp(int n, int m, double** x) {
-	mlp* layer = malloc(sizeof(mlp));
-	layer->n = n;
-	layer->m = m;
-
-	//set W
-	initialize_random(m, n, &layer->W);
-	// set b
-	initialize_random(m, 1, &layer->b);
-
-	layer->x = x;
-	return layer;
+// function for initializing a matrix to 0
+void initialize_to_zero_vector(int cols, double** matrix) {
+    *matrix = (double*)calloc(cols, sizeof(double*));
 }
 
-void clean_mlp(int n, int m, mlp* layer) {
-	for (int i = 0; i < m; i++) {
-		free(layer->W[i]);
-		free(layer->b[i]);
-	}
-	for (int i = 0; i < n; i++) {
-		free(layer->x[i]);
-	}
-	free(layer->W);
-	free(layer->b);
-	free(layer->x);
-	free(layer);
-}
+
