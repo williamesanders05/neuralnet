@@ -12,6 +12,15 @@ typedef struct data {
     int* targets;
 } data;
 
+void clean_data(data *d) {
+    for (int i = 0; i < d->num_samples; i++) {
+	free(d->data[i]);
+    }
+    free(d->data);
+    free(d->targets);
+    free(d);
+}
+
 data* initialize_data(char* file_name, int num_rows) {
     data* d = (data*)malloc(sizeof(data));
     d->num_samples = num_rows;

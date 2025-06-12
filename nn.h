@@ -31,6 +31,7 @@ typedef struct nn {
   double learning_rate;
   int num_layers;
   mlp **layers;
+  double* output;
 } nn;
 
 void RELU(double *input, double *output, int m) {
@@ -121,6 +122,7 @@ void forward(nn *network, double *output) {
       softmax(network->layers[i]->z, output, network->layers[i]->m);
     }
   }
+  deep_copy(network->layers[num_layers - 1]->m, network->layers[num_layers - 1]->a, network->output);
 }
 
 double calculate_loss(double *output, int label) {
@@ -184,8 +186,8 @@ void backpropagate(nn *network, double *output, double *target) {
 }
 
 // function for initializing an mlp layer
-mlp *initialize_mlp(int n, int m, double *x, bool x_initialized) {
-  mlp *layer = malloc(sizeof(mlp));
+mlp *initialize_mlp(int n, int m, double *x) {
+  mlp *layer = (mlp *)malloc(sizeof(mlp));
   layer->n = n;
   layer->m = m;
 
@@ -198,11 +200,7 @@ mlp *initialize_mlp(int n, int m, double *x, bool x_initialized) {
   // set a
   initialize_to_zero_vector(m, &layer->a);
 
-  if (x_initialized) {
-    layer->x = x;
-  } else {
-    initialize_to_zero_vector(n, &layer->x);
-  }
+  initialize_to_zero_vector(n, &layer->x);
   return layer;
 }
 
@@ -220,22 +218,17 @@ void clean_mlp(mlp *layer) {
 }
 
 // size of layer_inputs is num_layers + 1
-nn *initialize_nn(int num_layers, double learning_rate, int *layer_inputs,
-                  double *values) {
-  nn *network = malloc(sizeof(nn));
+nn *initialize_nn(int num_layers, double learning_rate, int *layer_inputs) {
+  nn *network = (nn *)malloc(sizeof(nn));
   network->num_layers = num_layers;
   network->learning_rate = learning_rate;
-  mlp **layers = malloc(sizeof(mlp *) * num_layers);
+  mlp **layers = (mlp **)malloc(sizeof(mlp *) * num_layers);
   // loop through layer inputs and last one is an output
-  for (int i = 0; i < num_layers - 1; i++) {
-    if (i == 0) {
-      layers[i] =
-          initialize_mlp(layer_inputs[i], layer_inputs[i + 1], values, 1);
-    } else {
-      layers[i] = initialize_mlp(layer_inputs[i], layer_inputs[i + 1],
-                                 (double *)NULL, 0);
-    }
+  for (int i = 0; i < num_layers; i++) {
+    layers[i] = initialize_mlp(layer_inputs[i], layer_inputs[i + 1],
+     (double *)NULL);
   }
+  network->output = (double*)calloc(layer_inputs[num_layers], sizeof(double));
   return network;
 }
 
@@ -245,4 +238,9 @@ void clean_nn(nn *network) {
   }
   free(network->layers);
   free(network);
+}
+
+void start_sample(nn *network, double *values) {
+  mlp* layer = network->layers[0];
+  deep_copy(layer->n, values, layer->x);
 }
